@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { subscriptionsApi } from '../api/subscriptions';
@@ -7,6 +7,7 @@ import RenewalDatePicker from '../components/form/RenewalDatePicker';
 
 export default function OnboardingForm() {
   const navigate = useNavigate();
+  const serviceNameRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     service_name: '',
@@ -15,6 +16,18 @@ export default function OnboardingForm() {
     next_renewal_date: '',
   });
   const [errors, setErrors] = useState({});
+
+  // Auto-focus on service name field
+  useEffect(() => {
+    if (serviceNameRef.current) {
+      serviceNameRef.current.focus();
+    }
+  }, []);
+
+  // Calculate monthly equivalent for yearly plans
+  const monthlyEquivalent = formData.billing_cycle === 'yearly' && formData.cost
+    ? (parseFloat(formData.cost) / 12).toFixed(2)
+    : null;
 
   const validate = () => {
     const newErrors = {};
@@ -57,7 +70,7 @@ export default function OnboardingForm() {
         next_renewal_date: formData.next_renewal_date,
       });
 
-      toast.success('Subscription added successfully!');
+      toast.success(`${formData.service_name} added successfully!`);
       navigate('/dashboard');
     } catch (error) {
       console.error('Error creating subscription:', error);
@@ -74,6 +87,14 @@ export default function OnboardingForm() {
     }
   };
 
+  // Handle keyboard shortcut (Enter to submit)
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[var(--background)] flex items-center justify-center px-6">
       <div className="w-full max-w-md">
@@ -81,7 +102,7 @@ export default function OnboardingForm() {
         <div className="mb-8">
           <button
             onClick={() => navigate('/')}
-            className="text-sm text-[var(--text)] hover:text-[var(--text-primary)] mb-4 inline-flex items-center gap-1"
+            className="text-sm text-[var(--text)] hover:text-[var(--text-primary)] mb-4 inline-flex items-center gap-1 transition-colors"
           >
             ← Back to home
           </button>
@@ -94,18 +115,20 @@ export default function OnboardingForm() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-5">
           {/* Service Name */}
           <div>
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
               Service Name
             </label>
             <input
+              ref={serviceNameRef}
               type="text"
               value={formData.service_name}
               onChange={(e) => handleChange('service_name', e.target.value)}
               placeholder="Netflix, Spotify, Figma..."
               className={`input ${errors.service_name ? 'border-[var(--danger)]' : ''}`}
+              autoComplete="off"
             />
             {errors.service_name && (
               <p className="text-sm text-[var(--danger)] mt-1">{errors.service_name}</p>
@@ -134,6 +157,12 @@ export default function OnboardingForm() {
             {errors.cost && (
               <p className="text-sm text-[var(--danger)] mt-1">{errors.cost}</p>
             )}
+            {/* Monthly Preview for Yearly */}
+            {monthlyEquivalent && (
+              <p className="text-sm text-[var(--positive)] mt-1">
+                = ${monthlyEquivalent}/month
+              </p>
+            )}
           </div>
 
           {/* Billing Cycle */}
@@ -158,6 +187,11 @@ export default function OnboardingForm() {
           >
             {loading ? 'Adding...' : 'Add Subscription'}
           </button>
+
+          {/* Keyboard hint */}
+          <p className="text-xs text-center text-[var(--text)]">
+            Press <kbd className="px-1.5 py-0.5 bg-[var(--background-secondary)] rounded border border-[var(--border)]">Enter</kbd> to submit
+          </p>
         </form>
       </div>
     </div>

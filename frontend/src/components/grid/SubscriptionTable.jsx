@@ -1,17 +1,6 @@
 import SubscriptionRow from './SubscriptionRow';
 
-export default function SubscriptionTable({ subscriptions, onToggleStatus }) {
-  if (subscriptions.length === 0) {
-    return (
-      <div className="card p-12 text-center">
-        <p className="text-[var(--text)]">No subscriptions yet.</p>
-        <p className="text-sm text-[var(--text)] mt-1">
-          Add your first subscription to start tracking.
-        </p>
-      </div>
-    );
-  }
-
+export default function SubscriptionTable({ subscriptions, onToggleStatus, onDelete }) {
   return (
     <div className="card overflow-hidden">
       {/* Table Header */}
@@ -31,6 +20,7 @@ export default function SubscriptionTable({ subscriptions, onToggleStatus }) {
             key={subscription.id}
             subscription={subscription}
             onToggleStatus={onToggleStatus}
+            onDelete={onDelete}
           />
         ))}
       </div>

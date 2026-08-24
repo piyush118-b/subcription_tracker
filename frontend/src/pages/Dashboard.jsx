@@ -1,24 +1,47 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSubscriptionContext } from '../context/SubscriptionContext';
 import { useMetrics } from '../hooks/useMetrics';
-import MetricCard from '../components/metrics/MetricCard';
 import BurnRateCard from '../components/metrics/BurnRateCard';
 import UpcomingRenewalsCard from '../components/metrics/UpcomingRenewalsCard';
 import SubscriptionTable from '../components/grid/SubscriptionTable';
+import EmptyState from '../components/EmptyState';
+import { SkeletonDashboard } from '../components/Skeleton';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 
 export default function Dashboard() {
-  const { subscriptions, loading, error, fetchSubscriptions, updateSubscription } =
+  const { subscriptions, loading, error, fetchSubscriptions, updateSubscription, deleteSubscription } =
     useSubscriptionContext();
   const metrics = useMetrics(subscriptions);
+  const [deleteModal, setDeleteModal] = useState({ open: false, subscription: null });
 
   useEffect(() => {
     fetchSubscriptions();
   }, [fetchSubscriptions]);
 
+  const handleDeleteClick = (subscription) => {
+    setDeleteModal({ open: true, subscription });
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteSubscription(deleteModal.subscription.id);
+      setDeleteModal({ open: false, subscription: null });
+    } catch (error) {
+      console.error('Delete error:', error);
+    }
+  };
+
   if (loading && subscriptions.length === 0) {
     return (
-      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-        <div className="text-[var(--text)]">Loading...</div>
+      <div className="min-h-screen bg-[var(--background)]">
+        <header className="px-6 py-5 border-b border-[var(--border)]">
+          <div className="max-w-6xl mx-auto">
+            <div className="h-7 w-32 bg-[var(--card-border)] rounded animate-pulse"></div>
+          </div>
+        </header>
+        <main className="max-w-6xl mx-auto px-6 py-8">
+          <SkeletonDashboard />
+        </main>
       </div>
     );
   }
@@ -26,7 +49,12 @@ export default function Dashboard() {
   if (error) {
     return (
       <div className="min-h-screen bg-[var(--background)] flex items-center justify-center">
-        <div className="text-[var(--danger)]">Error: {error}</div>
+        <div className="text-center">
+          <p className="text-[var(--danger)] mb-4">Error: {error}</p>
+          <button onClick={fetchSubscriptions} className="btn-primary">
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -60,12 +88,27 @@ export default function Dashboard() {
               Your Subscriptions
             </h2>
           </div>
-          <SubscriptionTable
-            subscriptions={subscriptions}
-            onToggleStatus={updateSubscription}
-          />
+
+          {subscriptions.length === 0 ? (
+            <EmptyState />
+          ) : (
+            <SubscriptionTable
+              subscriptions={subscriptions}
+              onToggleStatus={updateSubscription}
+              onDelete={handleDeleteClick}
+            />
+          )}
         </section>
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.open && (
+        <DeleteConfirmModal
+          subscription={deleteModal.subscription}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeleteModal({ open: false, subscription: null })}
+        />
+      )}
     </div>
   );
 }
