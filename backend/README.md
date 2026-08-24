@@ -1,93 +1,104 @@
-# Subscription Tracker Backend
+# Backend
 
-## Setup
+This folder contains the API — the behind-the-scenes code that the frontend talks to. It handles data storage (Supabase) and complex calculations.
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+## What It Does
 
-2. Create `.env` file:
-   ```bash
-   cp .env.example .env
-   ```
+- Stores subscriptions in the database
+- Calculates monthly costs (converts yearly to monthly)
+- Calculates days until renewal
+- Returns combined data + metrics in one response
 
-3. Update `.env` with your Supabase credentials:
-   - `SUPABASE_URL`: Your Supabase project URL
-   - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key (never expose this to frontend)
-   - `PORT`: Server port (default: 5000)
-   - `FRONTEND_URL`: Frontend URL for CORS (default: http://localhost:5173)
+## Why These Files Are Organized This Way
 
-4. Run the server:
-   ```bash
-   npm run dev
-   ```
-
-## API Endpoints
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | /api/health | Health check |
-| GET | /api/subscriptions | List all subscriptions with metrics |
-| POST | /api/subscriptions | Create new subscription |
-| PATCH | /api/subscriptions/:id | Update subscription status |
-| DELETE | /api/subscriptions/:id | Delete subscription |
-
-## Database Setup (Supabase)
-
-Run the following SQL in your Supabase SQL Editor:
-
-```sql
--- Enable UUID extension
-create extension if not exists "uuid-ossp";
-
--- Create enums
-create type billing_cycle_enum as enum ('monthly', 'yearly');
-create type subscription_status_enum as enum ('active', 'paused');
-
--- Create subscriptions table
-create table subscriptions (
-    id                  uuid primary key default uuid_generate_v4(),
-    user_id             uuid references auth.users(id),
-    service_name        text not null check (char_length(service_name) >= 2),
-    cost                numeric(10,2) not null check (cost > 0),
-    billing_cycle       billing_cycle_enum not null,
-    next_renewal_date   date not null,
-    status              subscription_status_enum not null default 'active',
-    description         text,
-    created_at          timestamptz not null default now(),
-    updated_at          timestamptz not null default now()
-);
-
--- Create indexes
-create index idx_subscriptions_status on subscriptions(status);
-create index idx_subscriptions_renewal on subscriptions(next_renewal_date);
-
--- Auto-update updated_at trigger
-create or replace function set_updated_at()
-returns trigger as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$ language plpgsql;
-
-create trigger trg_subscriptions_updated_at
-before update on subscriptions
-for each row execute function set_updated_at();
-
--- Optional: Enable RLS (uncomment when auth is set up)
--- alter table subscriptions enable row level security;
--- create policy "Users manage their own subscriptions"
---   on subscriptions for all
---   using (auth.uid() = user_id);
 ```
+backend/src/
+├── server.js              # Starts the app, connects everything
+├── routes/                # Maps URLs to controller functions
+├── controllers/           # Handles incoming requests
+├── services/              # Business logic (calculations)
+├── validators/            # Checks if input is valid
+├── middleware/            # Code that runs before/after requests
+└── config/                # Database connection
+```
+
+**Why separate services?**: Calculations like "convert yearly cost to monthly" might be needed in multiple places. Keeping it in one file means fixing it once fixes it everywhere.
+
+**Why validators?**: Instead of checking data in multiple places, validators check it once at the entrance. If data is bad, it gets rejected immediately.
+
+**Middleware**: Like a security guard or filter. Runs before the main request handler.
+
+## The Thought Process
+
+### Cost Normalization
+Users enter costs in different billing cycles (monthly, yearly). But comparing them is hard when they're different. 
+
+**Solution**: Convert everything to a monthly cost. Yearly ÷ 12. Weekly × 4.33.
+
+### Days Until Renewal
+We don't store "days until renewal" because it changes every day. If we stored it, it would be wrong tomorrow.
+
+**Solution**: Calculate it on-the-fly when someone asks. The server does this math using the renewal date + today's date.
+
+### API Response Shape
+Instead of two calls (one for list, one for totals), we return both together:
+
+```json
+{
+  "subscriptions": [...],
+  "metrics": {
+    "total_monthly_burn": 2340.50,
+    "upcoming_renewals_count": 3
+  }
+}
+```
+
+This means fewer requests from the frontend.
+
+## How to Run
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+The API runs at `http://localhost:5000`
 
 ## Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| SUPABASE_URL | Supabase project URL | Yes |
-| SUPABASE_SERVICE_ROLE_KEY | Supabase service role key (server-side only) | Yes |
-| PORT | Server port | No (default: 5000) |
-| FRONTEND_URL | Frontend URL for CORS | No (default: http://localhost:5173) |
+Create a `.env` file (copy from `.env.example`):
+
+```
+SUPABASE_URL=your-supabase-url
+SUPABASE_SERVICE_ROLE_KEY=your-secret-key
+PORT=5000
+FRONTEND_URL=http://localhost:5173
+```
+
+**Important**: Never share your `SUPABASE_SERVICE_ROLE_KEY`. It has full database access.
+
+## API Endpoints
+
+| Method | URL | What it does |
+|--------|-----|--------------|
+| GET | /api/health | Server is alive |
+| GET | /api/subscriptions | List all + metrics |
+| POST | /api/subscriptions | Add new subscription |
+| PATCH | /api/subscriptions/:id | Update status (active/paused) |
+| DELETE | /api/subscriptions/:id | Remove subscription |
+
+## Database Setup
+
+See the SQL commands in this folder's parent README. Run them once in Supabase SQL Editor to create the table.
+
+## File Reference
+
+| File | Purpose |
+|------|---------|
+| `server.js` | Main entry point |
+| `services/costNormalizer.service.js` | Converts yearly/weekly to monthly |
+| `services/renewalCalculator.service.js` | Calculates days until renewal |
+| `controllers/subscriptions.controller.js` | Handles subscription CRUD |
+| `validators/subscription.validator.js` | Input validation rules |
+| `config/supabaseClient.js` | Database connection |

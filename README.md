@@ -1,102 +1,142 @@
-# Subscription Tracker
+# Burnwatch — Subscription Tracker
 
-A modern SaaS application for tracking and managing subscriptions.
+A simple tool to help you track what you're paying for every month. Know your total monthly spend and get warned before renewals catch you off guard.
+
+## Project Overview
+
+**What problem does this solve?**
+- People forget about subscriptions they're paying for
+- Yearly and monthly plans are hard to compare
+- Renewals hit before you remember to cancel
+
+**Our approach:**
+1. Add a subscription in seconds (name, cost, billing cycle)
+2. We do the math — yearly plans become monthly costs
+3. You see your total burn rate and any upcoming renewals
 
 ## Tech Stack
 
-- **Frontend**: React + TypeScript + Vite
-- **Backend**: Node.js + Express
-- **CSS**: Tailwind CSS
-- **Database**: Supabase
+- **Frontend**: React (website UI)
+- **Backend**: Node.js + Express (API)
+- **Database**: Supabase (stores data)
+- **Styling**: Tailwind CSS
 
 ## Project Structure
 
 ```
-├── frontend/          # React application
-├── backend/           # Node.js API server
-├── CLAUDE.md         # Project documentation
-└── README.md         # This file
+subscription-tracker/
+├── frontend/          # React website (what users see)
+│   ├── pages/         # Main screens
+│   ├── components/     # UI pieces
+│   ├── api/           # Backend communication
+│   └── context/       # Data management
+│
+├── backend/           # Node.js API (behind the scenes)
+│   ├── routes/        # URL mappings
+│   ├── controllers/    # Request handlers
+│   ├── services/       # Business logic
+│   └── validators/     # Input checking
+│
+└── README.md          # You are here
 ```
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
+### 1. Set up the Database (Supabase)
 
-- Node.js 18+
-- npm or yarn
-- Supabase account
+Go to your Supabase project → SQL Editor and run the commands in `backend/README.md`.
 
-### Installation
+This creates the `subscriptions` table.
 
-1. Clone the repository
-2. Install frontend dependencies:
-   ```bash
-   cd frontend
-   npm install
-   ```
+### 2. Start the Backend
 
-3. Install backend dependencies:
-   ```bash
-   cd backend
-   npm install
-   ```
-
-### Configuration
-
-#### Frontend (.env)
-Create a `.env` file in the `frontend` directory:
-```
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-#### Backend (.env)
-Create a `.env` file in the `backend` directory:
-```
-SUPABASE_URL=your_supabase_url
-SUPABASE_SECRET_KEY=your_supabase_secret_key
-PORT=3001
-```
-
-### Running the Application
-
-Start the backend:
 ```bash
 cd backend
+npm install
+cp .env.example .env
+# Edit .env with your Supabase credentials
 npm run dev
 ```
 
-Start the frontend (in a new terminal):
+### 3. Start the Frontend
+
 ```bash
 cd frontend
+npm install
 npm run dev
 ```
 
-## Supabase Database Setup
+Open `http://localhost:5173` in your browser.
 
-Create a `subscriptions` table in your Supabase project with the following schema:
+## How It Works
 
-| Column        | Type        | Description                     |
-|---------------|-------------|----------------------------------|
-| id            | uuid        | Primary key (auto-generated)    |
-| name          | text        | Subscription name                |
-| amount        | numeric     | Cost amount                      |
-| billing_cycle | text        | weekly, monthly, or yearly       |
-| start_date    | date        | Subscription start date          |
-| category      | text        | Category (e.g., Entertainment)   |
-| description   | text        | Optional description             |
-| created_at    | timestamp   | Auto-generated                   |
-| updated_at    | timestamp   | Auto-updated                     |
+### Frontend Flow
+1. User visits `/` → sees landing page
+2. Clicks "Add Subscription" → goes to `/add` form
+3. Fills form → data POSTs to backend
+4. Success → redirects to `/dashboard`
+5. Dashboard shows all subscriptions + metrics
 
-## Design System
+### Backend Flow
+1. Receives request
+2. Validates input (is the cost a number? is the date valid?)
+3. Saves to / reads from Supabase
+4. Calculates derived values (monthly cost, days until renewal)
+5. Returns response
 
-### Colors
-- **Background**: Deep navy (`#0f172a`)
-- **Primary**: Electric blue (`#3b82f6`)
-- **Positive**: Green (`#22c55e`)
-- **Warning**: Amber (`#f59e0b`)
-- **Danger**: Red (`#ef4444`)
-- **Cards**: Dark surfaces (`#334155`)
+### The Math (Why We Calculate on Backend)
 
-### Typography
-- Font: Inter / system-ui stack
+**Monthly Normalization**
+- Monthly plan: $10/month → $10/month (no change)
+- Yearly plan: $120/year → $120 ÷ 12 = $10/month
+- Weekly plan: $3/week → $3 × 4.33 = $13/month
+
+We calculate this on the backend so:
+- The frontend doesn't need to know the formula
+- If we change the formula, we change it in one place
+- The data is consistent regardless of who's asking
+
+**Days Until Renewal**
+- Today's date is always changing
+- If we stored "days until renewal", it would be wrong tomorrow
+- So we calculate it fresh every time someone asks
+
+## Design Decisions
+
+### Dark Theme
+Finance apps feel more professional in dark mode. It also saves battery on OLED screens.
+
+### Single Accent Color (Blue)
+We use blue for interactive elements and key numbers. This makes the UI predictable.
+
+### Amber = Warning Only
+Amber is used only for "renewing soon" warnings. Using it elsewhere would dilute its meaning.
+
+### No Client-Side Math
+We don't calculate totals on the frontend because:
+- The backend already knows the formula
+- The backend has the authoritative data
+- It keeps the frontend simple
+
+## Environment Variables
+
+### Frontend (.env)
+```
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+### Backend (.env)
+```
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=xxxx   # Never share this!
+PORT=5000
+FRONTEND_URL=http://localhost:5173
+```
+
+## Future Ideas
+
+- User authentication (login, own subscriptions)
+- Email notifications before renewals
+- Edit existing subscriptions
+- Categories/tags for subscriptions
+- Export data to CSV

@@ -1,32 +1,64 @@
-# React + TypeScript + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This folder contains the user-facing part of Burnwatch — the website people see when they use the app.
 
-Currently, two official plugins are available:
+## What It Does
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Landing Page**: First thing visitors see. Explains what Burnwatch does and why they need it.
+- **Add Subscription Form**: Simple form to add a new subscription (service name, cost, billing cycle, renewal date).
+- **Dashboard**: Shows all subscriptions in a table with metrics like total monthly spend.
 
-## React Compiler
+## Why These Files Are Organized This Way
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+frontend/src/
+├── pages/           # Main screens (Landing, Add Form, Dashboard)
+├── components/      # Reusable UI pieces (buttons, cards, table rows)
+├── api/             # All calls to the backend
+├── context/         # Shared state across the app
+├── hooks/           # Reusable logic (fetching data, calculating metrics)
+└── styles/          # Global styling (colors, buttons, inputs)
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+**Pages vs Components**: Pages are full screens. Components are smaller pieces that pages use. Example: Dashboard (page) uses MetricCard (component).
+
+**Context**: React's way of sharing data without passing it through every file. Think of it like a shared clipboard.
+
+**Hooks**: Reusable logic functions. `useSubscriptions` fetches data, `useMetrics` calculates totals.
+
+## Design Choices
+
+We went with a dark theme because finance apps look more professional in dark mode. The blue accent color makes important numbers stand out.
+
+- **Primary (Blue)**: Key actions, important numbers
+- **Warning (Amber)**: Renewals coming soon (the only use of amber, so it means "pay attention")
+- **Green/Red**: Positive/negative indicators
+
+## How to Run
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The app runs at `http://localhost:5173`
+
+## API Connection
+
+The frontend talks to the backend at `http://localhost:5000/api`. This is configured in `.env`:
+
+```
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+When building for production, update this to your deployed backend URL.
+
+## File Reference
+
+| File | Purpose |
+|------|---------|
+| `App.jsx` | Main router — decides which page to show based on URL |
+| `main.jsx` | Entry point — loads the app |
+| `context/SubscriptionContext.jsx` | Holds all subscription data in one place |
+| `api/subscriptions.js` | All API calls (get list, create, update, delete) |
