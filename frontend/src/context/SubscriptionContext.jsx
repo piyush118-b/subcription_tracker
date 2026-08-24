@@ -13,7 +13,7 @@ export function SubscriptionProvider({ children }) {
     setError(null);
     try {
       const data = await subscriptionsApi.getAll();
-      setSubscriptions(data);
+      setSubscriptions(data.subscriptions);
     } catch (err) {
       setError(err.message || 'Failed to fetch subscriptions');
       console.error('Error fetching subscriptions:', err);
