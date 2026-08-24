@@ -117,8 +117,8 @@ export default function OnboardingForm() {
             <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1.5">
               Cost
             </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text)]">
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-sm font-medium text-[var(--text)] pointer-events-none select-none">
                 $
               </span>
               <input
@@ -128,7 +128,7 @@ export default function OnboardingForm() {
                 value={formData.cost}
                 onChange={(e) => handleChange('cost', e.target.value)}
                 placeholder="9.99"
-                className={`input pl-7 ${errors.cost ? 'border-[var(--danger)]' : ''}`}
+                className={`input !pl-8 ${errors.cost ? 'border-[var(--danger)]' : ''}`}
               />
             </div>
             {errors.cost && (
@@ -147,6 +147,7 @@ export default function OnboardingForm() {
             value={formData.next_renewal_date}
             onChange={(value) => handleChange('next_renewal_date', value)}
             error={errors.next_renewal_date}
+            billingCycle={formData.billing_cycle}
           />
 
           {/* Submit */}
