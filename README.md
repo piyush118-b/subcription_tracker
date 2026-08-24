@@ -221,6 +221,48 @@ Open `http://localhost:5173`
 
 ---
 
+## Deployment
+
+### Frontend — Vercel (Free & Open Source)
+
+The frontend is deployed on **Vercel** which offers a generous free tier for open source projects:
+
+1. **Connect GitHub Repository** to Vercel
+2. **Set Environment Variables** in Vercel:
+   ```
+   VITE_API_BASE_URL=https://your-backend.vercel.app/api
+   ```
+3. **Deploy** — Vercel auto-deploys on every push to `master`
+
+**Why Vercel?**
+- Free tier for open source projects
+- Automatic HTTPS/SSL
+- Global CDN for fast loading
+- Preview deployments for pull requests
+
+### Backend — Railway, Render, or Vercel Functions
+
+Options for backend deployment:
+
+| Platform | Free Tier | Notes |
+|----------|-----------|-------|
+| **Railway** | $5/month credit | Easy Node.js deployment |
+| **Render** | Free (sleeps after 15min) | Good for demos |
+| **Vercel Serverless** | Free | Requires adapter for Express |
+| **DigitalOcean App Platform** | Free for 3 apps | Good alternative |
+
+### Database — Supabase (Free Tier)
+
+Supabase provides a generous free tier:
+- 500MB database
+- 1GB file storage
+- 2GB bandwidth/month
+- 50K monthly active users
+
+**Total Cost: $0/month** (for personal/small project use)
+
+---
+
 ## Design System
 
 - **Background**: Deep navy (`#0f172a`)
