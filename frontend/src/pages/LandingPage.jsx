@@ -10,15 +10,29 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[var(--background)]">
       {/* Navbar */}
       <nav className="px-6 py-5 flex items-center justify-between max-w-6xl mx-auto">
-        <div className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">
-          Burnwatch
-        </div>
+        {/* Logo - Clickable to go home */}
         <button
-          onClick={() => navigate('/add')}
-          className="btn-primary text-sm"
+          onClick={() => navigate('/')}
+          className="text-xl font-semibold text-[var(--text-primary)] tracking-tight hover:text-[var(--primary)] transition-colors"
         >
-          Track My Subscriptions
+          Burnwatch
         </button>
+
+        {/* Nav Links */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="text-sm text-[var(--text)] hover:text-[var(--text-primary)] transition-colors"
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => navigate('/add')}
+            className="btn-primary text-sm"
+          >
+            Add Subscription
+          </button>
+        </div>
       </nav>
 
       {/* Main Content */}

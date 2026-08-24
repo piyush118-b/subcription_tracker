@@ -119,9 +119,13 @@ export default function Dashboard() {
       {/* Header */}
       <header className="px-6 py-5 border-b border-[var(--border)]">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">
+          {/* Logo - Clickable to go home */}
+          <button
+            onClick={() => window.location.href = '/'}
+            className="text-xl font-semibold text-[var(--text-primary)] tracking-tight hover:text-[var(--primary)] transition-colors"
+          >
             Burnwatch
-          </div>
+          </button>
           <div className="text-sm text-[var(--text)]">
             {metrics.activeCount} active subscription{metrics.activeCount !== 1 ? 's' : ''}
           </div>

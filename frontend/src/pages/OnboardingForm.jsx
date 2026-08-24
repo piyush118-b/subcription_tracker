@@ -96,16 +96,32 @@ export default function OnboardingForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center px-6">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="mb-8">
+    <div className="min-h-screen bg-[var(--background)]">
+      {/* Header */}
+      <header className="px-6 py-5 border-b border-[var(--border)]">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          {/* Logo - Clickable to go home */}
           <button
             onClick={() => navigate('/')}
-            className="text-sm text-[var(--text)] hover:text-[var(--text-primary)] mb-4 inline-flex items-center gap-1 transition-colors"
+            className="text-xl font-semibold text-[var(--text-primary)] tracking-tight hover:text-[var(--primary)] transition-colors"
           >
-            ← Back to home
+            Burnwatch
           </button>
+
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="text-sm text-[var(--text)] hover:text-[var(--text-primary)] transition-colors"
+          >
+            ← Back to Dashboard
+          </button>
+        </div>
+      </header>
+
+      {/* Form */}
+      <div className="flex items-center justify-center px-6 py-12">
+      <div className="w-full max-w-md">
+        {/* Form Header */}
+        <div className="mb-8">
           <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
             Add Your Subscription
           </h1>
@@ -193,6 +209,7 @@ export default function OnboardingForm() {
             Press <kbd className="px-1.5 py-0.5 bg-[var(--background-secondary)] rounded border border-[var(--border)]">Enter</kbd> to submit
           </p>
         </form>
+        </div>
       </div>
     </div>
   );
