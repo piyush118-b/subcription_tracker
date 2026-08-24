@@ -2,11 +2,10 @@
 
 /* Design System Variables */
 :root {
-  /* Colors */
   --background: #0f172a;
   --background-secondary: #1e293b;
-  --card: #334155;
-  --card-border: #475569;
+  --card: #1e293b;
+  --card-border: #334155;
 
   --primary: #3b82f6;
   --primary-hover: #2563eb;
@@ -25,9 +24,7 @@
 
   --border: #334155;
 
-  /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, Consolas, monospace;
 }
 
 * {
@@ -53,7 +50,7 @@ body {
   min-height: 100vh;
 }
 
-/* Utility classes for design system */
+/* Utility classes */
 .card {
   background: var(--card);
   border: 1px solid var(--card-border);
@@ -61,25 +58,41 @@ body {
 }
 
 .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   background: var(--primary);
   color: white;
   padding: 0.625rem 1.25rem;
   border-radius: 0.5rem;
   font-weight: 500;
-  transition: background-color 0.2s;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .btn-primary:hover {
   background: var(--primary-hover);
 }
 
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
+}
+
 .btn-danger {
   background: var(--danger);
   color: white;
-  padding: 0.625rem 1.25rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   font-weight: 500;
-  transition: background-color 0.2s;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .btn-danger:hover {
@@ -87,15 +100,42 @@ body {
 }
 
 .input {
-  background: var(--background-secondary);
+  background: var(--background);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   padding: 0.625rem 1rem;
   color: var(--text-primary);
   width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: border-color 0.15s ease;
 }
 
 .input:focus {
   outline: none;
   border-color: var(--primary);
+}
+
+.input::placeholder {
+  color: var(--text);
+  opacity: 0.7;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text);
 }
