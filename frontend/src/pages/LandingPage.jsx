@@ -1,10 +1,25 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Hero from '../components/landing/Hero';
 import FeatureGrid from '../components/landing/FeatureGrid';
 import CTASection from '../components/landing/CTASection';
+import LoadingScreen from '../components/LoadingScreen';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Brief loading for premium feel
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <LoadingScreen message="Loading Burnwatch..." />;
+  }
 
   return (
     <div className="min-h-screen bg-[var(--background)]">

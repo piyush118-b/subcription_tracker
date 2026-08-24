@@ -4,11 +4,13 @@ import toast from 'react-hot-toast';
 import { subscriptionsApi } from '../api/subscriptions';
 import BillingCycleSelect from '../components/form/BillingCycleSelect';
 import RenewalDatePicker from '../components/form/RenewalDatePicker';
+import LoadingScreen from '../components/LoadingScreen';
 
 export default function OnboardingForm() {
   const navigate = useNavigate();
   const serviceNameRef = useRef(null);
-  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     service_name: '',
     cost: '',
@@ -17,12 +19,21 @@ export default function OnboardingForm() {
   });
   const [errors, setErrors] = useState({});
 
-  // Auto-focus on service name field
+  // Brief loading for premium feel
   useEffect(() => {
-    if (serviceNameRef.current) {
-      serviceNameRef.current.focus();
-    }
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+      // Auto-focus on service name field
+      if (serviceNameRef.current) {
+        serviceNameRef.current.focus();
+      }
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
+
+  if (pageLoading) {
+    return <LoadingScreen message="Loading form..." />;
+  }
 
   // Calculate monthly equivalent for yearly plans
   const monthlyEquivalent = formData.billing_cycle === 'yearly' && formData.cost
@@ -61,7 +72,7 @@ export default function OnboardingForm() {
 
     if (!validate()) return;
 
-    setLoading(true);
+    setSubmitting(true);
     try {
       await subscriptionsApi.create({
         service_name: formData.service_name.trim(),
@@ -76,7 +87,7 @@ export default function OnboardingForm() {
       console.error('Error creating subscription:', error);
       toast.error(error.response?.data?.error || 'Failed to add subscription');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -198,10 +209,10 @@ export default function OnboardingForm() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={submitting}
             className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Adding...' : 'Add Subscription'}
+            {submitting ? 'Adding...' : 'Add Subscription'}
           </button>
 
           {/* Keyboard hint */}
