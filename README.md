@@ -1,52 +1,45 @@
 # Burnwatch — Subscription Tracker
 
-A simple tool to help you track what you're paying for every month. Know your total monthly spend and get warned before renewals catch you off guard.
+A personal finance dashboard that aggregates SaaS subscriptions and streaming services, tracks renewal dates, and monitors monthly cash-flow burn.
 
-## Project Overview
+## The Problem We Solve
 
-**What problem does this solve?**
-- People forget about subscriptions they're paying for
-- Yearly and monthly plans are hard to compare
-- Renewals hit before you remember to cancel
+1. **Subscriptions Sprawl** — Netflix, Figma, ChatGPT, that gym app you forgot about — spend spreads across billing cycles no one tracks in one place.
 
-**Our approach:**
-1. Add a subscription in seconds (name, cost, billing cycle)
-2. We do the math — yearly plans become monthly costs
-3. You see your total burn rate and any upcoming renewals
+2. **Annual vs Monthly Confusion** — A ₹4,999/year plan and a ₹499/month plan look different on paper. You need them on the same scale to know your real burn.
+
+3. **Silent Renewals** — Auto-renew charges hit your card before you remember to cancel. By the time you notice, the money's gone.
+
+## How It Works
+
+1. **Add a subscription** — Enter the service, cost, and billing cycle in seconds.
+2. **We normalize the math** — Yearly plans are converted to a true monthly cost automatically.
+3. **Track burn & renewals** — See total monthly spend and get flagged the moment a renewal is within 7 days.
 
 ## Tech Stack
 
-- **Frontend**: React (website UI)
-- **Backend**: Node.js + Express (API)
-- **Database**: Supabase (stores data)
-- **Styling**: Tailwind CSS
+| Layer | Technology |
+|-------|------------|
+| Frontend | React + Vite |
+| Styling | Tailwind CSS |
+| Backend | Node.js + Express |
+| Database | Supabase |
+| State | React Context + Hooks |
 
 ## Project Structure
 
 ```
 subscription-tracker/
 ├── frontend/          # React website (what users see)
-│   ├── pages/         # Main screens
-│   ├── components/     # UI pieces
-│   ├── api/           # Backend communication
-│   └── context/       # Data management
-│
-├── backend/           # Node.js API (behind the scenes)
-│   ├── routes/        # URL mappings
-│   ├── controllers/    # Request handlers
-│   ├── services/       # Business logic
-│   └── validators/     # Input checking
-│
-└── README.md          # You are here
+├── backend/         # Node.js API (behind the scenes)
+└── README.md        # You are here
 ```
 
 ## Quick Start
 
-### 1. Set up the Database (Supabase)
+### 1. Set up Supabase Database
 
 Go to your Supabase project → SQL Editor and run the commands in `backend/README.md`.
-
-This creates the `subscriptions` table.
 
 ### 2. Start the Backend
 
@@ -66,70 +59,82 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173` in your browser.
+Open `http://localhost:5173`
 
-## How It Works
+## Features
 
-### Frontend Flow
-1. User visits `/` → sees landing page
-2. Clicks "Add Subscription" → goes to `/add` form
-3. Fills form → data POSTs to backend
-4. Success → redirects to `/dashboard`
-5. Dashboard shows all subscriptions + metrics
+### Core Functionality
+- ✅ Add/Edit/Delete subscriptions
+- ✅ Cost normalization (yearly → monthly)
+- ✅ Days until renewal calculation
+- ✅ Active/Paused toggle (paused items excluded from burn rate)
+- ✅ "Renewing Soon" amber badge for items within 7 days
 
-### Backend Flow
-1. Receives request
-2. Validates input (is the cost a number? is the date valid?)
-3. Saves to / reads from Supabase
-4. Calculates derived values (monthly cost, days until renewal)
-5. Returns response
+### UX Improvements
+- ✅ Empty state with CTA
+- ✅ Skeleton loading animations
+- ✅ Delete confirmation modal
+- ✅ Monthly cost preview (when selecting yearly)
+- ✅ Form auto-focus
+- ✅ Keyboard shortcuts (Enter to submit)
+- ✅ Search subscriptions
+- ✅ Sort subscriptions (7 options)
+- ✅ Inline edit via modal
+- ✅ Success/error toasts
 
-### The Math (Why We Calculate on Backend)
+### Backend Features
+- ✅ Server-side calculations
+- ✅ Input validation
+- ✅ CORS protection
+- ✅ Error handling middleware
+- ✅ Cost uniformity engine
+- ✅ Date intersection calculator
 
-**Monthly Normalization**
-- Monthly plan: $10/month → $10/month (no change)
-- Yearly plan: $120/year → $120 ÷ 12 = $10/month
-- Weekly plan: $3/week → $3 × 4.33 = $13/month
+## Design System
 
-We calculate this on the backend so:
-- The frontend doesn't need to know the formula
-- If we change the formula, we change it in one place
-- The data is consistent regardless of who's asking
+- **Background**: Deep navy (`#0f172a`)
+- **Primary**: Electric blue (`#3b82f6`)
+- **Warning**: Amber (`#f59e0b`) — used ONLY for "Renewing Soon"
+- **Positive**: Green (`#22c55e`)
+- **Danger**: Red (`#ef4444`)
+- **Dark theme** for professional finance app feel
 
-**Days Until Renewal**
-- Today's date is always changing
-- If we stored "days until renewal", it would be wrong tomorrow
-- So we calculate it fresh every time someone asks
+## API Response Shape
 
-## Design Decisions
-
-### Dark Theme
-Finance apps feel more professional in dark mode. It also saves battery on OLED screens.
-
-### Single Accent Color (Blue)
-We use blue for interactive elements and key numbers. This makes the UI predictable.
-
-### Amber = Warning Only
-Amber is used only for "renewing soon" warnings. Using it elsewhere would dilute its meaning.
-
-### No Client-Side Math
-We don't calculate totals on the frontend because:
-- The backend already knows the formula
-- The backend has the authoritative data
-- It keeps the frontend simple
+```json
+{
+  "subscriptions": [
+    {
+      "id": "uuid",
+      "service_name": "Netflix",
+      "cost": 649.00,
+      "billing_cycle": "monthly",
+      "next_renewal_date": "2026-09-15",
+      "status": "active",
+      "monthly_normalized_cost": 649.00,
+      "days_until_renewal": 4,
+      "renewing_soon": true
+    }
+  ],
+  "metrics": {
+    "total_monthly_burn": 2340.50,
+    "upcoming_renewals_count": 1
+  }
+}
+```
 
 ## Environment Variables
 
 ### Frontend (.env)
 ```
-VITE_API_BASE_URL=http://localhost:5000/api
+VITE_API_BASE_URL=http://localhost:5001/api
 ```
 
 ### Backend (.env)
 ```
 SUPABASE_URL=https://xxxx.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=xxxx   # Never share this!
-PORT=5000
+PORT=5001
 FRONTEND_URL=http://localhost:5173
 ```
 
@@ -137,6 +142,7 @@ FRONTEND_URL=http://localhost:5173
 
 - User authentication (login, own subscriptions)
 - Email notifications before renewals
-- Edit existing subscriptions
-- Categories/tags for subscriptions
+- Subscription categories/tags
 - Export data to CSV
+- Monthly/yearly view toggle
+- Browser notifications

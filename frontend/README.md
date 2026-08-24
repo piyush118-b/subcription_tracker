@@ -1,40 +1,167 @@
-# Frontend
+# Frontend — Burnwatch
 
-This folder contains the user-facing part of Burnwatch — the website people see when they use the app.
+React application for the Subscription Tracker dashboard.
 
-## What It Does
+## Tech Stack
 
-- **Landing Page**: First thing visitors see. Explains what Burnwatch does and why they need it.
-- **Add Subscription Form**: Simple form to add a new subscription (service name, cost, billing cycle, renewal date).
-- **Dashboard**: Shows all subscriptions in a table with metrics like total monthly spend.
+- React 19 + Vite
+- React Router (routing)
+- Tailwind CSS (styling)
+- Axios (API calls)
+- date-fns (date formatting)
+- react-hot-toast (notifications)
 
-## Why These Files Are Organized This Way
+## Folder Structure
 
 ```
 frontend/src/
-├── pages/           # Main screens (Landing, Add Form, Dashboard)
-├── components/      # Reusable UI pieces (buttons, cards, table rows)
-├── api/             # All calls to the backend
-├── context/         # Shared state across the app
-├── hooks/           # Reusable logic (fetching data, calculating metrics)
-└── styles/          # Global styling (colors, buttons, inputs)
+├── pages/                  # Main screens
+│   ├── LandingPage.jsx     # Marketing page with hero, features, CTA
+│   ├── OnboardingForm.jsx  # Add subscription form
+│   └── Dashboard.jsx       # Metrics + subscription table
+│
+├── components/
+│   ├── landing/           # Landing page sections
+│   │   ├── Hero.jsx
+│   │   ├── FeatureGrid.jsx
+│   │   └── CTASection.jsx
+│   │
+│   ├── form/              # Form components
+│   │   ├── BillingCycleSelect.jsx
+│   │   └── RenewalDatePicker.jsx  # Calendar picker with quick select
+│   │
+│   ├── metrics/           # Dashboard metric cards
+│   │   ├── MetricCard.jsx
+│   │   ├── BurnRateCard.jsx
+│   │   └── UpcomingRenewalsCard.jsx
+│   │
+│   ├── grid/              # Table components
+│   │   ├── SubscriptionTable.jsx
+│   │   ├── SubscriptionRow.jsx
+│   │   ├── SearchSortBar.jsx
+│   │   ├── RenewingSoonBadge.jsx
+│   │   └── ActiveToggle.jsx
+│   │
+│   ├── EmptyState.jsx      # Shown when no subscriptions
+│   ├── Skeleton.jsx       # Loading placeholders
+│   ├── DeleteConfirmModal.jsx
+│   └── EditSubscriptionModal.jsx
+│
+├── api/
+│   └── subscriptions.js    # API wrapper (axios)
+│
+├── context/
+│   └── SubscriptionContext.jsx  # Global state management
+│
+├── hooks/
+│   ├── useSubscriptions.js  # Fetch + cache list
+│   └── useMetrics.js        # Derives burn rate + alert count
+│
+└── styles/
+    └── index.css           # Design system + Tailwind config
 ```
 
-**Pages vs Components**: Pages are full screens. Components are smaller pieces that pages use. Example: Dashboard (page) uses MetricCard (component).
+## Pages & Routes
 
-**Context**: React's way of sharing data without passing it through every file. Think of it like a shared clipboard.
+| Route | Component | Purpose |
+|-------|-----------|---------|
+| `/` | LandingPage | Marketing + explainer + CTA |
+| `/add` | OnboardingForm | Entry form for new subscription |
+| `/dashboard` | Dashboard | Metrics row + subscription grid |
 
-**Hooks**: Reusable logic functions. `useSubscriptions` fetches data, `useMetrics` calculates totals.
+## Features Implemented
 
-## Design Choices
+### Forms
+- ✅ Add subscription form with validation
+- ✅ Edit subscription modal
+- ✅ Delete confirmation modal
+- ✅ Auto-focus on first field
+- ✅ Enter to submit (keyboard shortcut)
+- ✅ Monthly preview when selecting yearly billing
+- ✅ Quick select buttons for renewal date (+7 days, +1 month, +1 year)
 
-We went with a dark theme because finance apps look more professional in dark mode. The blue accent color makes important numbers stand out.
+### Dashboard
+- ✅ Total Monthly Burn Rate card
+- ✅ Upcoming Renewals Alert count
+- ✅ Subscription table with sorting
+- ✅ Search/filter by name, billing cycle, description
+- ✅ Sort by: newest, oldest, name, cost, renewal date
+- ✅ "Renewing Soon" amber badge (within 7 days)
+- ✅ Active/Paused toggle (optimistic UI)
+- ✅ Row click to edit
+- ✅ Delete button on hover
+- ✅ Skeleton loading state
+- ✅ Empty state with CTA
 
-- **Primary (Blue)**: Key actions, important numbers
-- **Warning (Amber)**: Renewals coming soon (the only use of amber, so it means "pay attention")
-- **Green/Red**: Positive/negative indicators
+### Design
+- ✅ Dark theme (finance app aesthetic)
+- ✅ Inter font family
+- ✅ Consistent spacing (8px grid)
+- ✅ Amber = warning only (for renewals)
+- ✅ Responsive layout
 
-## How to Run
+## API Integration
+
+The frontend calls the backend via the Vite proxy:
+
+```javascript
+// Frontend → Vite Proxy → Backend
+// GET  /api/subscriptions
+// POST /api/subscriptions
+// PATCH /api/subscriptions/:id
+// DELETE /api/subscriptions/:id
+```
+
+Proxy configured in `vite.config.js`:
+```javascript
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://localhost:5001',
+      changeOrigin: true,
+    },
+  },
+},
+```
+
+## Context Architecture
+
+`SubscriptionContext` holds all subscription state and provides:
+- `subscriptions` — array of subscription objects
+- `loading` — boolean for loading state
+- `error` — error message if any
+- `fetchSubscriptions()` — refetch from API
+- `addSubscription()` — POST new subscription
+- `updateSubscription()` — PATCH subscription
+- `deleteSubscription()` — DELETE subscription
+
+Used by `useSubscriptions` hook which auto-fetches on mount.
+
+## Design System
+
+### Colors (CSS Variables)
+```css
+--background: #0f172a
+--background-secondary: #1e293b
+--card: #1e293b
+--primary: #3b82f6
+--positive: #22c55e
+--warning: #f59e0b
+--danger: #ef4444
+--text: #94a3b8
+--text-primary: #f1f5f9
+```
+
+### Component Classes
+```css
+.card        /* Dark card with border */
+.btn-primary /* Blue action button */
+.btn-danger  /* Red delete button */
+.btn-secondary /* Outlined button */
+.input      /* Dark input field */
+```
+
+## Running Locally
 
 ```bash
 cd frontend
@@ -42,23 +169,4 @@ npm install
 npm run dev
 ```
 
-The app runs at `http://localhost:5173`
-
-## API Connection
-
-The frontend talks to the backend at `http://localhost:5000/api`. This is configured in `.env`:
-
-```
-VITE_API_BASE_URL=http://localhost:5000/api
-```
-
-When building for production, update this to your deployed backend URL.
-
-## File Reference
-
-| File | Purpose |
-|------|---------|
-| `App.jsx` | Main router — decides which page to show based on URL |
-| `main.jsx` | Entry point — loads the app |
-| `context/SubscriptionContext.jsx` | Holds all subscription data in one place |
-| `api/subscriptions.js` | All API calls (get list, create, update, delete) |
+App runs at `http://localhost:5173`
