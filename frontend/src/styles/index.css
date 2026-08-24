@@ -1,6 +1,33 @@
 @import "tailwindcss";
 
-/* Design System Variables */
+/* Tailwind v4 Theme Configuration */
+@theme {
+  --color-background: #0f172a;
+  --color-background-secondary: #1e293b;
+  --color-card: #1e293b;
+  --color-card-border: #334155;
+
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-secondary: #6366f1;
+
+  --color-positive: #22c55e;
+  --color-positive-hover: #16a34a;
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+
+  --color-text: #94a3b8;
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+
+  --color-border: #334155;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Design System Variables for backwards compatibility with var(--...) */
 :root {
   --background: #0f172a;
   --background-secondary: #1e293b;
@@ -27,27 +54,29 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-html {
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-body {
-  background: var(--background);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.5;
-}
+  body {
+    background-color: var(--background);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
 
-#root {
-  min-height: 100vh;
+  #root {
+    min-height: 100vh;
+  }
 }
 
 /* Utility classes */
