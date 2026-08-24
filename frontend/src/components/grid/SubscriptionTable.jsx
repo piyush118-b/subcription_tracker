@@ -1,6 +1,10 @@
 import SubscriptionRow from './SubscriptionRow';
 
-export default function SubscriptionTable({ subscriptions, onToggleStatus, onDelete }) {
+export default function SubscriptionTable({ subscriptions, onToggleStatus, onDelete, onEdit }) {
+  if (subscriptions.length === 0) {
+    return null;
+  }
+
   return (
     <div className="card overflow-hidden">
       {/* Table Header */}
@@ -21,6 +25,7 @@ export default function SubscriptionTable({ subscriptions, onToggleStatus, onDel
             subscription={subscription}
             onToggleStatus={onToggleStatus}
             onDelete={onDelete}
+            onEdit={onEdit}
           />
         ))}
       </div>
